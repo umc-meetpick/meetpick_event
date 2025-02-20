@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
-import styled from "styled-components";
-// Chart.js 관련 import
+import styled, { createGlobalStyle } from "styled-components";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -12,139 +11,8 @@ import {
 } from "chart.js";
 import { Bar } from "react-chartjs-2";
 
-// Chart.js 컴포넌트 등록
 ChartJS.register(CategoryScale, LinearScale, BarElement, ChartTitle, Tooltip, Legend);
 
-//
-// 1. 테스트 질문 데이터 (총 12문항, 3페이지)
-// 각 질문의 옵션은 9가지 성향 중 하나의 결과 값(value)로 매핑됩니다.
-//
-const questionPages = [
-  {
-    questions: [
-      {
-        question: "1. 오늘 UMC 데모데이에 도착한 당신은?",
-        options: [
-          { text: "부스들부터 재빨리 탐색한다", value: "boxer" },
-          { text: "행사장을 천천히 둘러보며 정보를 수집한다", value: "basic" },
-          { text: "푸드 트럭부터 먼저 조진다", value: "earphone" },
-          { text: "부스 발표 잘 못하면 어떡하지 걱정한다", value: "grad" },
-        ],
-      },
-      {
-        question: "2. 데모데이 전, 당신의 준비 비법은?",
-        options: [
-          { text: "세부 자료부터 척척 살핀다", value: "study" },
-          { text: "핵심 내용만 쏙 정리해둔다", value: "hoodie" },
-          { text: "팀원들과 수다 떨며 아이디어 쏟아낸다", value: "burger" },
-          { text: "머릿속에서 번뜩이는 발상이 터진다", value: "wizard" },
-        ],
-      },
-      {
-        question: "3. 오늘은 데모데이 전날, 당신은?",
-        options: [
-          { text: "마지막까지 기능 테스트를 돌려보며 안정성을 점검한다", value: "boxer" },
-          { text: "준비 체크리스트를 보며 빠진 부분이 없는지 확인한다", value: "basic" },
-          { text: "일단 잠부터 자고 컨디션을 최우선으로 챙긴다", value: "earphone" },
-          { text: "지난 프로젝트 경험을 떠올리며 개선할 점을 정리한다", value: "grad" },
-        ],
-      },
-      {
-        question: "4. 첫 회의 후 회식자리에서 당신은?",
-  options: [
-    { text: "처음 보는 사람들과도 적극적으로 어울리며 분위기를 주도한다", value: "boxer" },
-    { text: "조용히 팀원들 옆에 앉아 분위기를 살핀다", value: "basic" },
-    { text: "잼얘로 모두를 즐겁게 한다", value: "earphone" },
-    { text: "한쪽에서 차분히 대화를 나누며 앞으로 뭐 먹고 살지 얘기한다", value: "grad" },
-  ],
-      },
-    ],
-  },
-  {
-    questions: [
-      {
-        question: "5. 첫 프로젝트 회의, 당신의 포지션은?",
-        options: [
-          { text: "모든 걸 주도하며 분위기를 이끈다", value: "boxer" },
-          { text: "필요한 정보를 깔끔하게 정리해 발표한다", value: "basic" },
-          { text: "동료들을 격려하며 긍정 에너지 뿜뿜", value: "scarf" },
-          { text: "혁신적인 아이디어로 모두를 놀라게 한다", value: "wizard" },
-        ],
-      },
-      {
-        question: "6. 프로젝트에서 예상치 못한 버그가 발생했다! 당신은?",
-        options: [
-          { text: "깊게 파고들며 원인을 철저히 분석한다", value: "study" },
-          { text: "핵심 원인을 빠르게 파악하고 해결책을 찾는다", value: "hoodie" },
-          { text: "팀원들과 머리 맞대며 해결 방안을 모색한다", value: "burger" },
-          { text: "GPT부터 돌려보고 힌트를 얻는다", value: "earphone" },
-        ],
-      },      
-      {
-        question: "7. 회의 중 의견 충돌, 당신의 대응은?",
-        options: [
-          { text: "무조건 내가 맞아", value: "boxer" },
-          { text: "침착하게 중재하며 상황을 수습한다", value: "basic" },
-          { text: "새로운 관점으로 문제를 재해석한다", value: "earphone" },
-          { text: "과거 사례를 들어 논리적으로 설명한다", value: "grad" },
-        ],
-      },
-      {
-        question: "8. 회의 후 피드백 시간, 어땠나요?",
-        options: [
-          { text: "자신의 발표를 분석하며 개선점을 찾는다", value: "study" },
-          { text: "동료의 의견에 귀 기울이며 배운다", value: "basic" },
-          { text: "창의적인 개선안을 과감히 제시한다", value: "wizard" },
-          { text: "따뜻한 미소로 분위기를 부드럽게 만든다", value: "burger" },
-        ],
-      },
-    ],
-  },
-  {
-    questions: [
-      {
-        question: "9. 새로운 기술 세미나, 첫 인상은 어땠나요?",
-        options: [
-          { text: "최신 트렌드를 단숨에 캐치한다", value: "earphone" },
-          { text: "핵심 개념을 꼼꼼하게 메모한다", value: "study" },
-          { text: "실제 사례에 열광하며 질문을 던진다", value: "basic" },
-          { text: "혁신 아이디어에 영감을 받아 잔뜩 메모한다", value: "wizard" },
-        ],
-      },
-      {
-        question: "10. 코드 리뷰 시간, 당신의 모습은?",
-        options: [
-          { text: "깊이 있는 분석으로 문제를 척척 발견한다", value: "study" },
-          { text: "간결한 피드백으로 개선점을 찝는다", value: "basic" },
-          { text: "문제의 핵심을 빠르게 파악해 바로 조치한다", value: "boxer" },
-          { text: "동료와 함께 해결 방안을 논의한다", value: "scarf" },
-        ],
-      },
-      {
-        question: "11. 프로젝트 마감 직전, 최후의 준비는?",
-        options: [
-          { text: "세밀한 계획으로 모든 것을 꼼꼼히 점검한다", value: "study" },
-          { text: "우선순위를 재정리해 급한 작업부터 처리한다", value: "hoodie" },
-          { text: "스트레스를 날려버리며 긍정 에너지를 발산한다", value: "burger" },
-          { text: "차분하게 최종 점검을 마무리한다", value: "basic" },
-        ],
-      },
-      {
-        question: "12. 프로젝트 성공 후, 기분은 어땠나요?",
-        options: [
-          { text: "자신의 노력을 자랑스럽게 느낀다", value: "grad" },
-          { text: "팀원들과 성공의 기쁨을 만끽한다", value: "scarf" },
-          { text: "새로운 도전을 향한 열정이 불타오른다", value: "wizard" },
-          { text: "조용히 성취의 여운에 잠긴다", value: "earphone" },
-        ],
-      },
-    ],
-  },
-];
-
-//
-// 2. 9가지 성향에 따른 결과 매핑
-//
 const baseUrl = "https://hangeulbucket.s3.ap-northeast-2.amazonaws.com";
 
 const characterDescriptions = {
@@ -213,7 +81,6 @@ const characterDescriptions = {
   },
 };
 
-// 2-1. 성향별 잘 맞는 캐릭터 매핑 (임의 설정)
 const characterMatches = {
   boxer: ["wizard", "burger"],
   basic: ["study", "scarf"],
@@ -226,111 +93,223 @@ const characterMatches = {
   study: ["basic", "grad"],
 };
 
-//
-// 3. styled-components 정의
-//
+const questionPages = [
+  {
+    questions: [
+      {
+        question: "1. 대학 생활 중! 아는 사람은 없는데 함께할 사람이 필요해. 그럴 때 나는?",
+        options: [
+          { text: "커뮤니티에 직접 구하는 글을 올려봐야지~", value: "boxer" },
+          { text: "구하는 글에 신청 댓글 달아보자!", value: "scarf" },
+          { text: "될대로 돼라~! 안해버리기.", value: "hoodie" },
+        ],
+      },
+      {
+        question: "2. 커뮤니티에서 사람 구하고 싶은데 때문에 너무 힘들어 ㅜㅅㅜ",
+        options: [
+          { text: "상대에 대한 정보 부족", value: "study" },
+          { text: "많은 정보가 분산되어 원하는 정보를 찾기 어려움", value: "grad" },
+          { text: "익명 기반으로 신뢰성이 부족함", value: "scarf" },
+        ],
+      },
+      {
+        question: "3. 나는 사람을 구할 때 을 가장 먼저 고려해!",
+        options: [
+          { text: "성별", value: "burger" },
+          { text: "나이 / 학번", value: "study" },
+          { text: "성격 (mbti) / 취미", value: "earphone" },
+        ],
+      },
+    ],
+  },
+  {
+    questions: [
+      {
+        question: "4. 오늘은 UMC 데모데이야! 나는 가자마자~",
+        options: [
+          { text: "가장 인기 많은 부스부터 봐야겠다!", value: "boxer" },
+          { text: "천천히 둘러보면서 관심 가는 부스부터 봐야지~", value: "wizard" },
+          { text: "푸드 트럭과 이벤트부터 먼저 조진다.", value: "burger" },
+        ],
+      },
+      {
+        question: "5. 이 부스 가봐야겠다! 나는 이 부스에서",
+        options: [
+          { text: "먼저 설명을 듣고 어떤 서비스인지 파악해야지.", value: "study" },
+          { text: "설명이 담긴 엑스배너부터 조용히 읽어봐야겠다.", value: "hoodie" },
+          { text: "이 팀의 분위기는 어떤지 확인해봐야지.", value: "scarf" },
+        ],
+      },
+      {
+        question: "6. 데모데이 끝나고 집으로 가는 길, 나는…",
+        options: [
+          { text: "다음 UMC에 꼭 참여해야지!", value: "boxer" },
+          { text: "이게 뭐지?", value: "wizard" },
+          { text: "피곤해 얼른 집에 가고 싶어..", value: "basic" },
+        ],
+      },
+    ],
+  },
+];
+
+/* 전역 스타일 설정 */
+const GlobalStyle = createGlobalStyle`
+  body {
+    margin: 0;
+    padding: 0;
+    background: #f0faff;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    color: #333;
+  }
+`;
+
+/* 테마 색상 */
+const primaryColor = "#1e90ff";
+const secondaryColor = "#87ceeb";
+
+/* 반응형 Container 스타일 */
 const Container = styled.div`
+  width: 90%;
   max-width: 600px;
   margin: 50px auto;
   padding: 30px;
-  background-color: #fdfdfd;
-  border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  background: #ffffff;
+  border: 1px solid ${secondaryColor};
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+
+  @media (min-width: 768px) {
+    width: 70%;
+    max-width: 800px;
+  }
+
+  @media (min-width: 1024px) {
+    width: 60%;
+    max-width: 1000px;
+  }
 `;
+
+/* 타이틀 스타일 */
 const Title = styled.h1`
   text-align: center;
-  color: #333;
-`;
-const QuestionTitle = styled.h2`
-  font-size: 1.25rem;
+  color: ${primaryColor};
   margin-bottom: 20px;
-  color: #333;
 `;
+
+/* 질문 타이틀 */
+const QuestionTitle = styled.h2`
+  font-size: 1.2rem;
+  margin-bottom: 16px;
+  color: ${primaryColor};
+`;
+
+/* 옵션 버튼 */
 const OptionButton = styled.button`
   width: 100%;
-  padding: 12px;
+  padding: 14px 20px;
   margin: 8px 0;
-  border: none;
-  border-radius: 4px;
-  background-color: ${(props) => (props.selected ? "#4caf50" : "#3f51b5")};
-  color: #fff;
+  border: 2px solid ${secondaryColor};
+  border-radius: 8px;
+  background-color: ${(props) => (props.selected ? secondaryColor : "#ffffff")};
+  color: ${(props) => (props.selected ? "#ffffff" : primaryColor)};
   font-size: 1rem;
   cursor: pointer;
+  transition: background-color 0.3s, border-color 0.3s;
   display: flex;
   justify-content: space-between;
   align-items: center;
   &:hover {
-    background-color: ${(props) =>
-      props.selected ? "#388e3c" : "#303f9f"};
+    background-color: ${(props) => (props.selected ? primaryColor : "#e6f7ff")};
   }
 `;
+
+/* 버튼 스타일 (다음, 결과, 통계 등) */
 const NextButton = styled.button`
   margin-top: 20px;
-  padding: 12px 20px;
-  background-color: #ff9800;
+  padding: 14px 28px;
+  background-color: ${secondaryColor};
   border: none;
-  border-radius: 4px;
-  color: #fff;
-  font-size: 1rem;
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 1.1rem;
   cursor: pointer;
+  transition: background-color 0.3s;
   &:hover {
-    background-color: #f57c00;
+    background-color: ${primaryColor};
   }
   &:disabled {
     background-color: #ccc;
     cursor: not-allowed;
   }
 `;
+
 const RestartButton = styled.button`
   margin-top: 20px;
-  padding: 12px 20px;
-  background-color: #e91e63;
+  margin-right: 40px;
+  padding: 14px 28px;
+  background-color: ${secondaryColor};
   border: none;
-  border-radius: 4px;
-  color: #fff;
-  font-size: 1rem;
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 1.1rem;
   cursor: pointer;
+  transition: background-color 0.3s;
   &:hover {
-    background-color: #c2185b;
+    background-color: ${primaryColor};
   }
 `;
+
 const StatsButton = styled.button`
   margin-top: 20px;
-  padding: 12px 20px;
-  background-color: #2196f3;
+  padding: 14px 28px;
+  background-color: ${secondaryColor};
   border: none;
-  border-radius: 4px;
-  color: #fff;
-  font-size: 1rem;
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 1.1rem;
   cursor: pointer;
+  transition: background-color 0.3s;
   &:hover {
-    background-color: #1976d2;
+    background-color: ${primaryColor};
   }
 `;
+
 const Progress = styled.div`
   margin-top: 20px;
   font-size: 0.9rem;
-  color: #666;
+  color: #555;
+  text-align: right;
 `;
+
 const ResultText = styled.div`
   text-align: center;
   margin-top: 20px;
 `;
+
 const ResultImage = styled.img`
   display: block;
   margin: 20px auto;
   width: 150px;
   height: 150px;
   border-radius: 50%;
+  border: 3px solid ${secondaryColor};
+
+  @media (min-width: 768px) {
+    width: 180px;
+    height: 180px;
+  }
 `;
+
 const MatchContainer = styled.div`
   margin-top: 30px;
   text-align: center;
 `;
+
 const MatchItem = styled.div`
   display: inline-block;
   margin: 0 10px;
 `;
+
 const MatchImage = styled.img`
   width: 50px;
   height: 50px;
@@ -339,16 +318,69 @@ const MatchImage = styled.img`
   margin: 0 auto 5px;
 `;
 
-//
-// 4. 통계 페이지: 로컬 스토리지 데이터를 불러와 Bar 차트로 시각화
-//
+const ButtonContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin-top: 20px;
+`;
+
+/* 시작 화면 스타일 */
+const SplashContainer = styled(Container)`
+  height: 100vh;
+  background: linear-gradient(135deg, #ffffff, #e0f7ff);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin: 0;
+  border: none;
+  box-shadow: none;
+`;
+
+const StartButton = styled.button`
+  margin-top: 20px;
+  padding: 16px 32px;
+  background-color: ${secondaryColor};
+  border: none;
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 1.3rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  &:hover {
+    background-color: ${primaryColor};
+  }
+`;
+
+const LogoImage = styled.img`
+  width: 360px;
+  height: auto;
+  max-width: 100%;
+  display: block;
+  margin: 0 auto;
+`;
+
+const StartScreen = ({ onStart }) => {
+  return (
+    <SplashContainer>
+      <img
+        src="https://hangeulbucket.s3.ap-northeast-2.amazonaws.com/default.png"
+        alt="Splash"
+        style={{ maxWidth: "80%", height: "auto", borderRadius: "8px" }}
+      />
+      <StartButton onClick={onStart}>시작하기</StartButton>
+    </SplashContainer>
+  );
+};
+
 const StatisticsPage = ({ onBack }) => {
   const [stats, setStats] = useState({});
 
   useEffect(() => {
     const data = localStorage.getItem("testResults");
     let results = data ? JSON.parse(data) : [];
-    // 각 성향별 카운트 계산
     const counts = results.reduce((acc, curr) => {
       acc[curr] = (acc[curr] || 0) + 1;
       return acc;
@@ -356,7 +388,6 @@ const StatisticsPage = ({ onBack }) => {
     setStats(counts);
   }, []);
 
-  // 차트 데이터 생성
   const labels = Object.keys(characterDescriptions).map(
     (key) => characterDescriptions[key].title
   );
@@ -370,8 +401,8 @@ const StatisticsPage = ({ onBack }) => {
       {
         label: "응답 수",
         data: dataCounts,
-        backgroundColor: "rgba(63, 81, 181, 0.5)",
-        borderColor: "rgba(63, 81, 181, 1)",
+        backgroundColor: "rgba(135, 206, 235, 0.5)",
+        borderColor: "rgba(135, 206, 235, 1)",
         borderWidth: 1,
       },
     ],
@@ -403,17 +434,14 @@ const StatisticsPage = ({ onBack }) => {
   );
 };
 
-//
-// 5. 메인 컴포넌트: 다단계 테스트, 결과 및 통계 보기
-//
 export default function MultiPageTest() {
+  const [startTest, setStartTest] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
-  const [answers, setAnswers] = useState([]); // 각 답변: { page, qIndex, value }
+  const [answers, setAnswers] = useState([]);
   const [showResult, setShowResult] = useState(false);
   const [showStats, setShowStats] = useState(false);
   const [computedResult, setComputedResult] = useState(null);
 
-  // 옵션 클릭 시 해당 답변 저장
   const handleOptionClick = (pageIndex, questionIndex, value) => {
     const newAnswers = [...answers];
     const answerIndex = newAnswers.findIndex(
@@ -427,14 +455,11 @@ export default function MultiPageTest() {
     setAnswers(newAnswers);
   };
 
-  // 현재 페이지의 모든 질문에 답변했는지 확인
   const isPageAnswered = () => {
     const pageAnswers = answers.filter((ans) => ans.page === currentPage);
     return pageAnswers.length === questionPages[currentPage].questions.length;
   };
 
-  // 전체 답변 중 최빈 결과(성향)를 계산  
-  // (빈도수가 같은 경우 후보들 중 무작위 선택)
   const computeResult = () => {
     const allValues = answers.map((ans) => ans.value);
     const freqMap = {};
@@ -450,7 +475,6 @@ export default function MultiPageTest() {
     return { type: chosen, data: characterDescriptions[chosen] };
   };
 
-  // 로컬 스토리지에 테스트 결과 저장 (성향 타입만 저장)
   const storeTestResult = (resultType) => {
     const data = localStorage.getItem("testResults");
     let results = data ? JSON.parse(data) : [];
@@ -458,20 +482,17 @@ export default function MultiPageTest() {
     localStorage.setItem("testResults", JSON.stringify(results));
   };
 
-  // 페이지 이동 및 결과 처리
   const handleNextPage = () => {
     if (currentPage < questionPages.length - 1) {
       setCurrentPage(currentPage + 1);
     } else {
       const computed = computeResult();
       storeTestResult(computed.type);
-      // computedResult에 타입 정보도 함께 저장
       setComputedResult(computed);
       setShowResult(true);
     }
   };
 
-  // 테스트 초기화
   const handleRestart = () => {
     setCurrentPage(0);
     setAnswers([]);
@@ -480,79 +501,93 @@ export default function MultiPageTest() {
     setComputedResult(null);
   };
 
-  // 결과 화면 렌더링: 결과와 통계 보기 버튼 포함
+
   if (showResult) {
     if (showStats) {
-      return <StatisticsPage onBack={() => setShowStats(false)} />;
+      return (
+        <>
+          <GlobalStyle />
+          <StatisticsPage onBack={() => setShowStats(false)} />
+        </>
+      );
     }
-
-    // computedResult.type를 바탕으로 잘 맞는 캐릭터 계산
     const matchingKeys = characterMatches[computedResult.type] || [];
     const matchingCharacters = matchingKeys.map(
       (key) => characterDescriptions[key]
     );
 
     return (
-      <Container>
-        <Title>결과</Title>
-        <ResultImage src={computedResult.data.image} alt={computedResult.data.title} />
-        <ResultText>
-          <h2>{computedResult.data.title}</h2>
-          <p>{computedResult.data.description}</p>
-        </ResultText>
-        <MatchContainer>
-          <h3>당신과 잘 맞는 캐릭터</h3>
-          {matchingCharacters.map((char, idx) => (
-            <MatchItem key={idx}>
-              <MatchImage src={char.image} alt={char.title} />
-              <div>{char.title}</div>
-            </MatchItem>
-          ))}
-        </MatchContainer>
-        <NextButton onClick={handleRestart}>테스트 다시하기</NextButton>
-        <StatsButton onClick={() => setShowStats(true)}>
-          통계 보기
-        </StatsButton>
-      </Container>
+      <>
+        <GlobalStyle />
+        <Container>
+          <Title>결과</Title>
+          <ResultImage
+            src={computedResult.data.image}
+            alt={computedResult.data.title}
+          />
+          <ResultText>
+            <h2>{computedResult.data.title}</h2>
+            <p>{computedResult.data.description}</p>
+          </ResultText>
+          <MatchContainer>
+            <h3>당신과 잘 맞는 캐릭터</h3>
+            {matchingCharacters.map((char, idx) => (
+              <MatchItem key={idx}>
+                <MatchImage src={char.image} alt={char.title} />
+                <div>{char.title}</div>
+              </MatchItem>
+            ))}
+          </MatchContainer>
+          <ButtonContainer>
+            <NextButton onClick={handleRestart}>테스트 다시하기</NextButton>
+            <StatsButton onClick={() => setShowStats(true)}>
+              통계 보기
+            </StatsButton>
+          </ButtonContainer>
+        </Container>
+      </>
     );
   }
 
-  // 현재 페이지의 질문 렌더링
   const currentQuestions = questionPages[currentPage].questions;
   return (
-    <Container>
-      <Title> MEET PICK 당신과 어울리는 미기는? </Title>
-      {currentQuestions.map((q, qIndex) => {
-        const pageAnswer = answers.find(
-          (ans) => ans.page === currentPage && ans.qIndex === qIndex
-        );
-        return (
-          <div key={qIndex}>
-            <QuestionTitle>{q.question}</QuestionTitle>
-            {q.options.map((opt, optIndex) => {
-              const isSelected = pageAnswer && pageAnswer.value === opt.value;
-              return (
-                <OptionButton
-                  key={optIndex}
-                  onClick={() =>
-                    handleOptionClick(currentPage, qIndex, opt.value)
-                  }
-                  selected={isSelected}
-                >
-                  <span>{opt.text}</span>
-                  {isSelected && <span>✔</span>}
-                </OptionButton>
-              );
-            })}
-          </div>
-        );
-      })}
-      <Progress>
-        {currentPage + 1} / {questionPages.length} 페이지
-      </Progress>
-      <NextButton onClick={handleNextPage} disabled={!isPageAnswered()}>
-        {currentPage === questionPages.length - 1 ? "결과 보기" : "다음 페이지"}
-      </NextButton>
-    </Container>
+    <>
+      <GlobalStyle />
+      <Container>
+        <LogoImage src = "https://hangeulbucket.s3.ap-northeast-2.amazonaws.com/logo.png"></LogoImage>
+        <Title>MEET PICK 당신과 어울리는 미기는?</Title>
+        {currentQuestions.map((q, qIndex) => {
+          const pageAnswer = answers.find(
+            (ans) => ans.page === currentPage && ans.qIndex === qIndex
+          );
+          return (
+            <div key={qIndex}>
+              <QuestionTitle>{q.question}</QuestionTitle>
+              {q.options.map((opt, optIndex) => {
+                const isSelected = pageAnswer && pageAnswer.value === opt.value;
+                return (
+                  <OptionButton
+                    key={optIndex}
+                    onClick={() =>
+                      handleOptionClick(currentPage, qIndex, opt.value)
+                    }
+                    selected={isSelected}
+                  >
+                    <span>{opt.text}</span>
+                    {isSelected && <span>✔</span>}
+                  </OptionButton>
+                );
+              })}
+            </div>
+          );
+        })}
+        <Progress>
+          {currentPage + 1} / {questionPages.length} 페이지
+        </Progress>
+        <NextButton onClick={handleNextPage} disabled={!isPageAnswered()}>
+          {currentPage === questionPages.length - 1 ? "결과 보기" : "다음 페이지"}
+        </NextButton>
+      </Container>
+    </>
   );
 }
